@@ -1,2 +1,2 @@
 [my_servers]
-apache-vodaphone ansible_host=10.64.16.150 ansible_user=myuser
+apache-vodaphone ansible_host=10.64.16.150 
