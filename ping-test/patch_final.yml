@@ -1,6 +1,6 @@
 ---
 - name: Patch Management for CVE
-  hosts: ubuntul
+  hosts: my_servers
   become: yes
   gather_facts: yes
 
