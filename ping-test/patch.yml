@@ -32,7 +32,7 @@
         msg: "{{ security_updates.stdout_lines }}"
       when: security_updates.stdout_lines is defined and security_updates.stdout_lines | length > 0
  
-     - name: Fix dpkg interrupted state (Debian-based)
+    - name: Fix dpkg interrupted state (Debian-based)
       command: dpkg --configure -a
       when: ansible_os_family == "Debian"
 
