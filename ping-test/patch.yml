@@ -31,6 +31,19 @@
       debug:
         msg: "{{ security_updates.stdout_lines }}"
       when: security_updates.stdout_lines is defined and security_updates.stdout_lines | length > 0
+ 
+     - name: Fix dpkg interrupted state (Debian-based)
+      command: dpkg --configure -a
+      when: ansible_os_family == "Debian"
+
+    - name: Ensure apt lock is not held (Debian-based)
+      shell: |
+        while fuser /var/lib/dpkg/lock >/dev/null 2>&1; do
+          sleep 1
+        done
+      when: ansible_os_family == "Debian"     
+
+
 
     - name: Apply security updates (Debian-based)
       apt:
