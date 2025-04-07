@@ -1,0 +1,71 @@
+---
+- name: Patch Management for CVE
+  hosts: my_servers
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Update package cache (Debian-based)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Update package cache (RHEL-based)
+      yum:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+    - name: List available security updates (Debian-based)
+      shell: "apt list --upgradable 2>/dev/null | grep -i security || true"
+      register: security_updates
+      changed_when: false
+      when: ansible_os_family == "Debian"
+
+    - name: List available security updates (RHEL-based)
+      shell: "yum list updates --security || true"
+      register: security_updates
+      changed_when: false
+      when: ansible_os_family == "RedHat"
+
+    - name: Show available security updates
+      debug:
+        msg: "{{ security_updates.stdout_lines }}"
+      when: security_updates.stdout_lines is defined and security_updates.stdout_lines | length > 0
+
+    - name: Apply security updates (Debian-based)
+      apt:
+        upgrade: dist
+        only_upgrade: yes
+        autoremove: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Apply security updates (RHEL-based)
+      yum:
+        name: "*"
+        security: yes
+        state: latest
+      when: ansible_os_family == "RedHat"
+
+    - name: Check if reboot is required (Debian-based)
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+      when: ansible_os_family == "Debian"
+
+    - name: Check if reboot is required (RHEL-based)
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+      when: ansible_os_family == "RedHat"
+
+    - name: Reboot if required (Debian-based)
+      reboot:
+        msg: "Rebooting to apply security updates"
+        post_reboot_delay: 30
+      when: reboot_required.stat.exists and ansible_os_family == "Debian"
+
+    - name: Reboot if required (RHEL-based)
+      reboot:
+        msg: "Rebooting to apply security updates"
+        post_reboot_delay: 30
+      when: reboot_required.stat.exists and ansible_os_family == "RedHat"
