@@ -56,20 +56,9 @@
       register: reboot_required_debian
       when: ansible_os_family == "Debian"
 
-    - name: Check if reboot is required (RHEL-based)
-      stat:
-        path: /var/run/reboot-required
-      register: reboot_required_rhel
-      when: ansible_os_family == "RedHat"
-
     - name: Reboot if required (Debian-based)
       reboot:
         msg: "Rebooting to apply security updates"
         post_reboot_delay: 30
       when: reboot_required_debian.stat.exists and ansible_os_family == "Debian"
 
-    - name: Reboot if required (RHEL-based)
-      reboot:
-        msg: "Rebooting to apply security updates"
-        post_reboot_delay: 30
-      when: reboot_required_rhel.stat.exists and ansible_os_family == "RedHat"
