@@ -34,7 +34,9 @@
 
     - name: Fix interrupted dpkg (Debian-based)
       shell: dpkg --configure -a
-      when: ansible_os_family == "Debian"
+      when: ansible_os_family == "Debian"     
+
+
 
     - name: Apply security updates (Debian-based)
       apt:
@@ -53,23 +55,23 @@
     - name: Check if reboot is required (Debian-based)
       stat:
         path: /var/run/reboot-required
-      register: reboot_required_debian
+      register: reboot_required
       when: ansible_os_family == "Debian"
 
     - name: Check if reboot is required (RHEL-based)
       stat:
         path: /var/run/reboot-required
-      register: reboot_required_rhel
+      register: reboot_required
       when: ansible_os_family == "RedHat"
 
     - name: Reboot if required (Debian-based)
       reboot:
         msg: "Rebooting to apply security updates"
         post_reboot_delay: 30
-      when: reboot_required_debian.stat.exists and ansible_os_family == "Debian"
+      when: reboot_required.stat.exists and ansible_os_family == "Debian"
 
     - name: Reboot if required (RHEL-based)
       reboot:
         msg: "Rebooting to apply security updates"
         post_reboot_delay: 30
-      when: reboot_required_rhel.stat.exists and ansible_os_family == "RedHat"
+      when: reboot_required.stat.exists and ansible_os_family == "RedHat"
