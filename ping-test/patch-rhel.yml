@@ -1,0 +1,41 @@
+---
+- name: Patch Management for RHEL-based Systems
+  hosts: rhel_servers
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Ensure system is RHEL-based
+      assert:
+        that: ansible_os_family == "RedHat"
+        fail_msg: "This playbook should only be run on RHEL-based systems."
+
+    - name: Update package cache
+      yum:
+        update_cache: yes
+
+    - name: List available security updates
+      shell: "yum list updates --security || true"
+      register: security_updates
+      changed_when: false
+
+    - name: Show available security updates
+      debug:
+        msg: "{{ security_updates.stdout_lines }}"
+      when: security_updates.stdout_lines | length > 0
+
+    - name: Apply security updates
+      yum:
+        name: "*"
+        security: yes
+        state: latest
+
+    - name: Check if reboot is required
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_required
+
+    - name: Reboot if required
+      reboot:
+        msg: "Rebooting to apply security updates"
+        post_reboot_delay: 30
+      when: reboot_required.stat.exists
