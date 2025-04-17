@@ -1,3 +1,9 @@
 [my_servers]
 apache-vodaphone ansible_host=10.64.16.150 
+
+
+[debian_servers]
+apache-vodaphone ansible_host=10.64.16.150
+
+[rhel_servers]
 freeradval ansible_host=10.64.16.173
