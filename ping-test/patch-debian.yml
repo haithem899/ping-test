@@ -1,6 +1,6 @@
 ---
 - name: Patch Management for Debian-based Systems
-  hosts: debian_servers
+  hosts: my_servers
   become: yes
   gather_facts: yes
   tasks:
